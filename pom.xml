@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.playwright</groupId>
+    <artifactId>playwright-manager</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>playwright-manager</name>
+    <description>Playwright Manager</description>
+
+    <modules>
+        <module>playwright</module>
+    </modules>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.version>3.10.1</maven.compiler.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <playwright.version>1.33.0</playwright.version>
+        <lombok.version>1.18.26</lombok.version>
+        <junit.jupiter.version>5.9.2</junit.jupiter.version>
+        <rerunner.jupiter.version>2.1.6</rerunner.jupiter.version>
+
+        <!-- project properties -->
+        <skipBuildInfo>true</skipBuildInfo>
+        <skipTests>false</skipTests>
+        <skipChecks>false</skipChecks>
+
+        <!-- code quality -->
+        <pmd.version>6.51.0</pmd.version>
+        <maven-pmd-plugin.version>3.19.0</maven-pmd-plugin.version>
+        <checkstyle.version>10.4</checkstyle.version>
+        <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
+        <spotbugs.version>4.7.3</spotbugs.version>
+
+        <!-- plugin versions -->
+        <maven.surefire.version>3.0.0-M9</maven.surefire.version>
+        <failsafe.version>3.3.0</failsafe.version>
+        <logback.version>1.4.7</logback.version>
+        <assertj.core.version>3.24.2</assertj.core.version>
+        <assertj.joda.version>2.2.0</assertj.joda.version>
+        <jackson.version>2.16.1</jackson.version>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Check source style -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${maven-checkstyle-plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${checkstyle.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <skip>${skipChecks}</skip>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                        <configLocation>../playwright-manager/.codequality/checkstyle.xml</configLocation>
+                        <suppressionsLocation>.codequality/checkstyle-suppressions.xml</suppressionsLocation>
+                        <failOnViolation>true</failOnViolation>
+                        <maxAllowedViolations>0</maxAllowedViolations>
+                        <logViolationsToConsole>true</logViolationsToConsole>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>default-check</id>
+                            <phase>process-sources</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- Check source problems -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>${maven-pmd-plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-core</artifactId>
+                            <version>${pmd.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-java</artifactId>
+                            <version>${pmd.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <skip>${skipChecks}</skip>
+                        <linkXRef>false</linkXRef>
+                        <excludeRoots>
+                            <excludeRoot>target/generated-sources/</excludeRoot>
+                        </excludeRoots>
+                        <verbose>true</verbose>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>default check</id>
+                            <phase>process-sources</phase>
+                            <goals>
+                                <goal>check</goal>
+                                <goal>cpd-check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <!-- FullBuild - to be run in Jenkins as a complete build with all options -->
+        <profile>
+            <id>FullBuild</id>
+            <properties>
+                <skipTests>false</skipTests>
+                <skipChecks>false</skipChecks>
+                <skipBuildInfo>false</skipBuildInfo>
+            </properties>
+        </profile>
+
+        <!-- FastBuild - to be run on local without tests or style checks -->
+        <profile>
+            <id>FastBuild</id>
+            <properties>
+                <!-- Properties to turn on specific profiles -->
+                <skipTests>true</skipTests>
+                <skipChecks>true</skipChecks>
+                <skipBuildInfo>true</skipBuildInfo>
+            </properties>
+        </profile>
+
+        <!-- RunLocal - to run local app on package -->
+        <profile>
+            <id>RunLocal</id>
+            <properties>
+                <skipTests>true</skipTests>
+                <skipChecks>true</skipChecks>
+                <skipBuildInfo>false</skipBuildInfo>
+            </properties>
+            <build>
+                <defaultGoal>package</defaultGoal>
+            </build>
+        </profile>
+    </profiles>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/rohit-walia/playwright-for-java</url>
+        </repository>
+    </distributionManagement>
+
+</project>
