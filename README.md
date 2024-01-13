@@ -5,8 +5,20 @@ way to manage Playwright resources in a thread safe manner.
 
 ## Installation
 
+Add following repository in your settings.xml file
+
+```xml
+<repository>
+  <id>github</id>
+  <url>https://maven.pkg.github.com/rohit-walia/playwright-manager</url>
+  <snapshots>
+    <enabled>true</enabled>
+  </snapshots>
+</repository>
+```
+
 Paste Maven dependency in your pom.xml file and add `playwright.manager.version` in your properties.
-This property should contain the latest version of this library.
+This property should contain the latest version of this library. Lastly, run `mvn install`.
 
 ```xml
 <dependency>
