@@ -28,9 +28,9 @@ jobs:
           cache: maven
 
       - name: Build and package
-        run: mvn --batch-mode package -pl playwright -am -P FullBuild
+        run: mvn --batch-mode clean package -pl playwright -am -P FullBuild
 
       - name: Publish to GitHub Packages
-        run: mvn --batch-mode deploy -pl playwright -am -P FastBuild
+        run: mvn --batch-mode clean deploy -pl playwright -am -P FastBuild
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
