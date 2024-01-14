@@ -1,12 +1,19 @@
 # 🎭 Playwright Resource Manager
 
-This library is dedicated for testing projects utilizing Microsoft's Playwright for Java automation tool. It provides easy
-way to manage Playwright resources in a thread safe manner.
+The Playwright Resource Manager is a library dedicated to testing-oriented projects that utilize Microsoft's 
+**Playwright _for_ Java** automation tool. It provides a convenient way to manage Playwright resources, 
+making it easier to work with Playwright in your testing projects. The `PlaywrightResourceManager` class is 
+specifically designed to help you efficiently manage the lifecycle of Playwright resources.
+
+With PlaywrightResourceManager, you can easily create, reuse, and close Playwright resources. 
+It provides both default options and the flexibility to customize resource creation based on your specific requirements. 
+Focus more on writing your test code and less on managing the underlying Playwright resources.
 
 ## Installation
 
-Add following repository in your settings.xml file
+To use the Playwright Resource Manager in your project, follow these steps:
 
+1. Add following repository in your `settings.xml` file
 ```xml
 <repository>
   <id>github</id>
@@ -17,9 +24,7 @@ Add following repository in your settings.xml file
 </repository>
 ```
 
-Paste Maven dependency in your pom.xml file and add `playwright.manager.version` in your properties.
-This property should contain the latest version of this library. Lastly, run `mvn install`.
-
+2. Add the Maven dependency to your `pom.xml` file. Make sure to use the latest version available:
 ```xml
 <dependency>
   <groupId>org.playwright</groupId>
@@ -28,39 +33,41 @@ This property should contain the latest version of this library. Lastly, run `mv
 </dependency>
 ```
 
+3. Run mvn install
+
 ## Examples
 
-#### Managing resources with default options
+#### Creating resources with default options
 
-This code snippet shows how you can manage Playwright resources easily using the PlaywrightResourceManager.
+This code snippet shows how you can create Playwright resources using the **PlaywrightResourceManager**.
 By default, resources will be created with the default Option. See package [here](playwright/src/main/java/org/playwright/core/options)
 for available options.
 
 The BrowserContext resource is always created as a new instance.
-The Browser and Playwright instances are reused if there is one already existing (default behavior). 
+The Browser and Playwright instances are reused if there is one already existing (default behavior).
 However this can be overridden by passing ResourceOptionArg.NEW_BROWSER_INSTANCE or ResourceOptionArg.NEW_PLAYWRIGHT_INSTANCE
 as arguments to the create() method.
 
 ```Java
 @Test
 void resourcesWithDefaultOptions {
-  // create resources
+  // create resources w/ default options
   Playwright playwright = PlaywrightResourceFactory.create(PlaywrightResource.PLAYWRIGHT);
   Browser browser = PlaywrightResourceFactory.create(PlaywrightResource.BROWSER);
   BrowserContext browserContext = PlaywrightResourceFactory.create(PlaywrightResource.BROWSER_CONTEXT);
 
-  // open browser and do things
+  // open browser page and do things
   Page page = browserContext.newPage();
   page.navigate("https://github.com/rohit-walia/playwright-manager");
 
-  // close resources
+  // remember to close the resources when you are finished with them!
   PlaywrightResourceFactory.close(browserContext);
   PlaywrightResourceFactory.close(browser);
   PlaywrightResourceFactory.close(playwright);
 }
 ```
 
-#### Managing resources with custom options
+#### Creating resources with custom options
 
 You can pass arguments to the create() method to customize how you want to create these resources. Every
 Option is a Builder Object.
@@ -89,7 +96,7 @@ void resourcesWithCustomOptions {
 ### Java17
 
 This project is currently using Java v17. See [here](https://www.oracle.com/java/technologies/downloads/#java17) for Java v17
-JDK binaries. JDK 17 binaries are free to use in production and free to redistribute, at no cost, under the 
+JDK binaries. JDK 17 binaries are free to use in production and free to redistribute, at no cost, under the
 Oracle No-Fee Terms and Conditions (NFTC).
 
 ### Junit5
