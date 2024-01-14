@@ -9,21 +9,22 @@ import org.junit.jupiter.api.Test;
 import org.playwright.common.OptionCtx;
 import org.playwright.common.PlaywrightResource;
 import org.playwright.common.ResourceOptionArg;
-import org.playwright.core.PlaywrightResourceFactory;
+import org.playwright.core.PlaywrightManager;
 import org.playwright.core.options.BrowserContextOption;
 import org.playwright.core.options.BrowserLaunchOption;
 import org.playwright.core.options.IOption;
 import org.playwright.core.options.PlaywrightOption;
 import org.playwright.core.options.TracingStartOption;
 
-class PlaywrightResourceFactoryTest {
+class PlaywrightManagerTest {
   @Test
   void testPlaywrightResourceFactory_CreatingInChronologicalOrder() {
     // test as much functionality as possible without opening more than one Playwright connection.
     // create resources in chronological order as this is the expected usage pattern.
-    Playwright playwright = PlaywrightResourceFactory.create(PlaywrightResource.PLAYWRIGHT);
-    Browser browser = PlaywrightResourceFactory.create(PlaywrightResource.BROWSER);
-    BrowserContext browserContext = PlaywrightResourceFactory.create(PlaywrightResource.BROWSER_CONTEXT);
+    PlaywrightOption playwrightOption = PlaywrightOption.builder().enableDebugMode(true).build();
+    Playwright playwright = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT, playwrightOption);
+    Browser browser = PlaywrightManager.create(PlaywrightResource.BROWSER);
+    BrowserContext browserContext = PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT);
 
     Assertions.assertNotNull(playwright);
     Assertions.assertNotNull(browser);
@@ -36,9 +37,9 @@ class PlaywrightResourceFactoryTest {
     verifyOnMultiplePlaywright(playwright);
 
     // close all resources
-    PlaywrightResourceFactory.close(browserContext);
-    PlaywrightResourceFactory.close(browser);
-    PlaywrightResourceFactory.close(playwright);
+    PlaywrightManager.close(browserContext);
+    PlaywrightManager.close(browser);
+    PlaywrightManager.close(playwright);
 
     // verify resources are disconnected and can't be invoked after they are closed
     Assertions.assertFalse(browser.isConnected(), "When a Browser resource is closed, it should be disconnected");
@@ -50,28 +51,28 @@ class PlaywrightResourceFactoryTest {
   void testPlaywrightResourceFactory_CreatingInNonChronologicalOrder() {
     // try creating BrowserContext without creating upstream resources first
     Assertions.assertThrows(PlaywrightException.class,
-        () -> PlaywrightResourceFactory.create(PlaywrightResource.BROWSER_CONTEXT),
+        () -> PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT),
         "When creating BrowserContext without creating upstream resource first, it should throw an exception.");
 
     // try creating Browser without creating upstream resource first
-    Assertions.assertThrows(PlaywrightException.class, () -> PlaywrightResourceFactory.create(PlaywrightResource.BROWSER),
+    Assertions.assertThrows(PlaywrightException.class, () -> PlaywrightManager.create(PlaywrightResource.BROWSER),
         "When creating Browser without creating upstream resource first, it should throw an exception.");
   }
 
   private void verifyOnMultiplePlaywright(Playwright originalPlaywright) {
-    Playwright newPlaywright = PlaywrightResourceFactory.create(PlaywrightResource.PLAYWRIGHT);
+    Playwright newPlaywright = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT);
     Assertions.assertEquals(originalPlaywright, newPlaywright, "Creating new Playwright resource when there "
         + "is an existing instance, by default, should return the existing Playwright instance");
   }
 
   private void verifyOnMultipleBrowser(Browser originalBrowser) {
-    Browser newBrowser1 = PlaywrightResourceFactory.create(PlaywrightResource.BROWSER);
+    Browser newBrowser1 = PlaywrightManager.create(PlaywrightResource.BROWSER);
     Assertions.assertEquals(originalBrowser, newBrowser1, "Creating new Browser resource when there is an "
         + "existing Browser instance, by default, should return the existing browser instance");
 
     IOption<?> originalBrowserLaunchOption = OptionCtx.getContext().get(OptionCtx.Key.BROWSER_LAUNCH_OPTION);
     BrowserLaunchOption newBrowserLaunchOptions = BrowserLaunchOption.builder().slowmo(500).build();
-    Browser newBrowser2 = PlaywrightResourceFactory.create(PlaywrightResource.BROWSER,
+    Browser newBrowser2 = PlaywrightManager.create(PlaywrightResource.BROWSER,
         ResourceOptionArg.NEW_BROWSER_INSTANCE, newBrowserLaunchOptions);
 
     Assertions.assertNotEquals(newBrowser1, newBrowser2, "Creating new Browser resource with "
@@ -79,7 +80,7 @@ class PlaywrightResourceFactoryTest {
     Assertions.assertNotEquals(newBrowserLaunchOptions, originalBrowserLaunchOption, "Creating new Browser resource "
         + "with ResourceOptionArg.NEW_BROWSER_INSTANCE should override the existing BrowserLaunchOption.");
 
-    PlaywrightResourceFactory.close(newBrowser2);
+    PlaywrightManager.close(newBrowser2);
     Assertions.assertFalse(newBrowser2.isConnected(), "When a Browser resource is closed, it should be disconnected");
     Assertions.assertTrue(newBrowser1.isConnected(), "When a new Browser resource is created, the original Browser "
         + "resource should still be connected");
@@ -95,7 +96,7 @@ class PlaywrightResourceFactoryTest {
     TracingStartOption newTraceStartOption = TracingStartOption.builder().enableScreenshot(false).build();
 
     // create new BrowserContext and pass new options as arguments
-    BrowserContext newBrowserContext = PlaywrightResourceFactory.create(PlaywrightResource.BROWSER_CONTEXT,
+    BrowserContext newBrowserContext = PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT,
         newBrowserContextOption,
         newTraceStartOption);
 
@@ -106,7 +107,7 @@ class PlaywrightResourceFactoryTest {
     Assertions.assertNotEquals(origTracingStartOption, newTraceStartOption, "When multiple BrowserContext is "
         + "created, then the original TracingStartOption should be overridden by the new TracingStartOption.");
 
-    PlaywrightResourceFactory.close(newBrowserContext);
+    PlaywrightManager.close(newBrowserContext);
     Assertions.assertThrows(PlaywrightException.class, () -> newBrowserContext.setDefaultTimeout(1), "After closing "
         + "a BrowserContext, it should not be possible to manipulate it.");
   }
