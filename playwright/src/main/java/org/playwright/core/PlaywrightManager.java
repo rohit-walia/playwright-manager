@@ -21,14 +21,13 @@ import java.util.List;
 /**
  * Abstract factory interface for managing Playwright resources.
  */
-public interface PlaywrightResourceFactory {
+public interface PlaywrightManager {
 
   /**
    * Create Playwright resources which includes: Playwright, Browser, BrowserContext. <br><br>
    *
-   * <p>
-   * By default, resources will be created with the default Option. See package {@link org.playwright.core.options} for
-   * available options. <br>
+   * <p>By default, resources will be created with the default Option. See package {@link org.playwright.core.options} for
+   * available options.<p><br>
    *
    * The BrowserContext resource is always created as a new instance. <br>
    * The Browser and Playwright instances are reused if there is one already existing (default behavior). However this

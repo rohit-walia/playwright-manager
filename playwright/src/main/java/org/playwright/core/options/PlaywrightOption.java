@@ -11,8 +11,16 @@ import java.util.Map;
 @Builder(toBuilder = true)
 @Jacksonized
 public class PlaywrightOption implements IOption<Playwright.CreateOptions> {
+
+  /**
+   * This option configures Playwright for debugging and opens the inspector.
+   * Browser launches in headed mode hence use this for local runs only.
+   */
   @Builder.Default
   boolean enableDebugMode = false;
+
+  @Builder.Default
+  boolean enableVerboseApiLogs = false;
 
   @Override
   public Playwright.CreateOptions forPlaywright() {
@@ -20,6 +28,10 @@ public class PlaywrightOption implements IOption<Playwright.CreateOptions> {
 
     if (enableDebugMode) {
       options.setEnv(Map.of("PWDEBUG", "1", "PLAYWRIGHT_JAVA_SRC", "src/test/java"));
+    }
+
+    if (enableVerboseApiLogs) {
+      options.setEnv(Map.of("DEBUG", "pw:api"));
     }
 
     return options;
