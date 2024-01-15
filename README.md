@@ -75,13 +75,15 @@ Option is a Builder Object.
 ```Java
 @Test
 void resourcesWithCustomOptions {
-    // custom build PlaywrightOption
-    PlaywrightOption playwrightOption = PlaywrightOption.builder().enableDebugMode(true).build();
+    // enable debug mode and verbose api logging
+    PlaywrightOption playwrightOption = PlaywrightOption.builder()
+        .enableDebugMode(true)
+        .enableVerboseApiLogs(true)
+        .build();
     
-    // create Playwright w/ custom PlaywrightOption
     Playwright playwright = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT, playwrightOption);
 
-    // custom build BrowserLaunchOption
+    // custom BrowserLaunchOption
     BrowserLaunchOption browserLaunchOption = BrowserLaunchOption.builder()
         .headless(false)
         .slowmo(300)

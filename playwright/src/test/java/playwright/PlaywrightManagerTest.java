@@ -18,11 +18,10 @@ import org.playwright.core.options.TracingStartOption;
 
 class PlaywrightManagerTest {
   @Test
-  void testPlaywrightResourceFactory_CreatingInChronologicalOrder() {
+  void testPlaywrightManager_CreatingResourcesInChronologicalOrder() {
     // test as much functionality as possible without opening more than one Playwright connection.
     // create resources in chronological order as this is the expected usage pattern.
-    PlaywrightOption playwrightOption = PlaywrightOption.builder().enableDebugMode(true).build();
-    Playwright playwright = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT, playwrightOption);
+    Playwright playwright = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT);
     Browser browser = PlaywrightManager.create(PlaywrightResource.BROWSER);
     BrowserContext browserContext = PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT);
 
@@ -48,7 +47,7 @@ class PlaywrightManagerTest {
   }
 
   @Test
-  void testPlaywrightResourceFactory_CreatingInNonChronologicalOrder() {
+  void testPlaywrightManager_CreatingResourcesInNonChronologicalOrder() {
     // try creating BrowserContext without creating upstream resources first
     Assertions.assertThrows(PlaywrightException.class,
         () -> PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT),
@@ -101,39 +100,39 @@ class PlaywrightManagerTest {
         newTraceStartOption);
 
     Assertions.assertNotEquals(originalBrowserContext, newBrowserContext, "When multiple BrowserContext are created"
-        + "by invoking PlaywrightResourceFactory#create, each BrowserContext should be a new instance.");
+        + "by invoking PlaywrightManager#create, each BrowserContext should be a new instance.");
     Assertions.assertNotEquals(origBrowserContextOption, newBrowserContextOption, "When multiple BrowserContext "
         + "is created, then the original BrowserContextOption should be overridden by the new BrowserContextOption.");
     Assertions.assertNotEquals(origTracingStartOption, newTraceStartOption, "When multiple BrowserContext is "
         + "created, then the original TracingStartOption should be overridden by the new TracingStartOption.");
 
     PlaywrightManager.close(newBrowserContext);
-    Assertions.assertThrows(PlaywrightException.class, () -> newBrowserContext.setDefaultTimeout(1), "After closing "
-        + "a BrowserContext, it should not be possible to manipulate it.");
+    Assertions.assertThrows(PlaywrightException.class, () -> newBrowserContext.setDefaultTimeout(1),
+        "After closing a BrowserContext, it should not be possible to manipulate it.");
   }
 
   private void verifyOptionContextHasDefaultValues() {
     PlaywrightOption expectedDefaultPlaywrightOptions = PlaywrightOption.builder().build();
     IOption<?> actualPlaywrightOption = OptionCtx.getContext().get(OptionCtx.Key.PLAYWRIGHT_OPTION);
     Assertions.assertEquals(expectedDefaultPlaywrightOptions, actualPlaywrightOption, "When Playwright is created"
-        + "by invoking PlaywrightResourceFactory#create, without passing any arguments, the default PlaywrightOption "
+        + "by invoking PlaywrightManager#create, without passing any arguments, the default PlaywrightOption "
         + "should be set in the context.");
 
     BrowserLaunchOption expectedBrowserLaunchOptions = BrowserLaunchOption.builder().build();
     IOption<?> actualBrowserLaunchOption = OptionCtx.getContext().get(OptionCtx.Key.BROWSER_LAUNCH_OPTION);
     Assertions.assertEquals(expectedBrowserLaunchOptions, actualBrowserLaunchOption, "When Browser is created"
-        + "by invoking PlaywrightResourceFactory#create, without passing any arguments, the default BrowserLaunchOption "
+        + "by invoking PlaywrightManager#create, without passing any arguments, the default BrowserLaunchOption "
         + "should be set in the context.");
 
     BrowserContextOption expectedBrowserContextOption = BrowserContextOption.builder().build();
     IOption<?> actualBrowserContextOption = OptionCtx.getContext().get(OptionCtx.Key.BROWSER_CONTEXT_OPTION);
     Assertions.assertEquals(expectedBrowserContextOption, actualBrowserContextOption, "When BrowserContext is created"
-        + "by invoking PlaywrightResourceFactory#create, without passing any arguments, the default BrowserContextOption "
+        + "by invoking PlaywrightManager#create, without passing any arguments, the default BrowserContextOption "
         + "should be set in the context.");
 
     TracingStartOption expectedTraceStartOption = TracingStartOption.builder().build();
     IOption<?> actualTracingStartOption = OptionCtx.getContext().get(OptionCtx.Key.TRACE_START_OPTION);
     Assertions.assertEquals(expectedTraceStartOption, actualTracingStartOption, "When BrowserContext is created"
-        + "by invoking PlaywrightResourceFactory#create the default TracingStartOption should be set in the context.");
+        + "by invoking PlaywrightManager#create the default TracingStartOption should be set in the context.");
   }
 }
