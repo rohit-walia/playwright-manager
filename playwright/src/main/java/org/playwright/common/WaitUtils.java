@@ -4,8 +4,8 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Response;
 import com.microsoft.playwright.options.LoadState;
 import lombok.extern.slf4j.Slf4j;
-import org.playwright.failsafe.FailsafeFallback;
-import org.playwright.failsafe.FailsafeRetry;
+import org.failsafe.failsafe.fallback.FallbackTo;
+import org.failsafe.failsafe.retry.RetryAgain;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,7 +29,7 @@ public class WaitUtils {
    * @param page Page object
    */
   public static void waitForAllLoadStates(Page page) {
-    FailsafeFallback.withLog(() -> {
+    FallbackTo.logger(() -> {
       page.waitForLoadState(LoadState.LOAD);
       page.waitForLoadState(LoadState.DOMCONTENTLOADED);
       page.waitForLoadState(LoadState.NETWORKIDLE);
@@ -56,7 +56,7 @@ public class WaitUtils {
     });
 
     Response response = page.waitForResponse(r -> r.url().contains(urlToWaitFor),
-        () -> FailsafeRetry.withDefault(() -> page.navigate(urlToNavigate)));
+        () -> RetryAgain.once(() -> page.navigate(urlToNavigate)));
     WaitUtils.waitForAllLoadStates(page);
 
     try {

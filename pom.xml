@@ -21,13 +21,19 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.version>3.10.1</maven.compiler.version>
+        <maven.surefire.version>3.0.0-M9</maven.surefire.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <playwright.version>1.33.0</playwright.version>
-        <lombok.version>1.18.26</lombok.version>
-        <junit.jupiter.version>5.9.2</junit.jupiter.version>
+        <junit.jupiter.version>5.10.2</junit.jupiter.version>
         <rerunner.jupiter.version>2.1.6</rerunner.jupiter.version>
+        <failsafe-helper.version>0.1.0-SNAPSHOT</failsafe-helper.version>
+        <jackson-helper.version>0.1.0-SNAPSHOT</jackson-helper.version>
+        <lombok.version>1.18.30</lombok.version>
+        <logback.version>1.5.0</logback.version>
+        <assertj.core.version>3.24.2</assertj.core.version>
+        <assertj.joda.version>2.2.0</assertj.joda.version>
 
         <!-- project properties -->
         <skipBuildInfo>true</skipBuildInfo>
@@ -40,15 +46,23 @@
         <checkstyle.version>10.4</checkstyle.version>
         <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
         <spotbugs.version>4.7.3</spotbugs.version>
-
-        <!-- plugin versions -->
-        <maven.surefire.version>3.0.0-M9</maven.surefire.version>
-        <failsafe.version>3.3.0</failsafe.version>
-        <logback.version>1.4.7</logback.version>
-        <assertj.core.version>3.24.2</assertj.core.version>
-        <assertj.joda.version>2.2.0</assertj.joda.version>
-        <jackson.version>2.16.1</jackson.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>compile</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <pluginManagement>
@@ -168,5 +182,4 @@
             <url>https://maven.pkg.github.com/rohit-walia/playwright-manager</url>
         </repository>
     </distributionManagement>
-
 </project>
