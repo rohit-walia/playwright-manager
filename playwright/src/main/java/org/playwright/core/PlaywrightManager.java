@@ -5,6 +5,7 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import lombok.SneakyThrows;
+import org.failsafe.failsafe.retry.RetryAgain;
 import org.playwright.common.OptionCtx;
 import org.playwright.common.PlaywrightResource;
 import org.playwright.common.ResourceOptionArg;
@@ -13,7 +14,6 @@ import org.playwright.core.options.BrowserLaunchOption;
 import org.playwright.core.options.PlaywrightOption;
 import org.playwright.core.options.TracingStartOption;
 import org.playwright.core.options.TracingStopOption;
-import org.playwright.failsafe.FailsafeRetry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,8 +27,9 @@ public interface PlaywrightManager {
    * Create Playwright resources which includes: Playwright, Browser, BrowserContext. <br><br>
    *
    * <p>By default, resources will be created with the default Option. See package {@link org.playwright.core.options} for
-   * available options.<p><br>
+   * available options.</p><br>
    *
+   * <p>
    * The BrowserContext resource is always created as a new instance. <br>
    * The Browser and Playwright instances are reused if there is one already existing (default behavior). However this
    * can be overridden by passing ResourceOptionArg.NEW_BROWSER_INSTANCE or ResourceOptionArg.NEW_PLAYWRIGHT_INSTANCE</p><br>
@@ -91,7 +92,7 @@ public interface PlaywrightManager {
             : PlaywrightOption.builder().build());
 
     // failsafe retry put in place to avoid rare occurrence of playwright driver failing to initialize at Runtime.
-    FailsafeRetry.tryAgain(() -> PlaywrightSingleton.setInstance(Playwright.create(options.forPlaywright())), 5, 1);
+    RetryAgain.onceWithDelay(() -> PlaywrightSingleton.setInstance(Playwright.create(options.forPlaywright())), 5);
 
     OptionCtx.add(OptionCtx.Key.PLAYWRIGHT_OPTION, options);
 

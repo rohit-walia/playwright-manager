@@ -28,9 +28,15 @@ jobs:
           cache: maven
 
       - name: Build and package
-        run: mvn --batch-mode clean package -pl playwright -am -P FullBuild
+        run: mvn -s $GITHUB_WORKSPACE/.github/mvn-settings.xml -B package -pl playwright -am -P FullBuild
+        env:
+          USER_NAME: ${{ secrets.USER_NAME }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to GitHub Packages
-        run: mvn --batch-mode clean deploy -pl playwright -am -P FastBuild
+        run: mvn -s $GITHUB_WORKSPACE/.github/mvn-settings.xml -B deploy -pl playwright -am -P FastBuild
         env:
+          USER_NAME: ${{ secrets.USER_NAME }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -11,20 +11,8 @@ Focus more on writing your test code and less on managing the underlying Playwri
 
 ## Installation
 
-To use the Playwright Resource Manager in your project, follow these steps:
-
-1. Add following repository in your `settings.xml` file
-```xml
-<repository>
-  <id>github</id>
-  <url>https://maven.pkg.github.com/rohit-walia/playwright-manager</url>
-  <snapshots>
-    <enabled>true</enabled>
-  </snapshots>
-</repository>
-```
-
-2. Add the Maven dependency to your `pom.xml` file. Make sure to use the latest version available:
+To use the Playwright Resource Manager in your project, add the Maven dependency to your `pom.xml` file. Make sure to use 
+the latest version available and run `mvn clean install`.
 ```xml
 <dependency>
   <groupId>org.playwright</groupId>
@@ -32,8 +20,6 @@ To use the Playwright Resource Manager in your project, follow these steps:
   <version>${playwright.manager.version}</version>
 </dependency>
 ```
-
-3. Run mvn install
 
 ## Examples
 
