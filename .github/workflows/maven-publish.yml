@@ -28,7 +28,7 @@ jobs:
           cache: maven
           settings-path: ${{ github.workspace }}/.github
 
-      - name: Build and package
+      - name: Build, Test and Package
         run: mvn -B package -pl playwright -am -P FullBuild
         env:
           USER_NAME: ${{ secrets.USER_NAME }}
@@ -36,7 +36,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to GitHub Packages
-        run: mvn -s $GITHUB_WORKSPACE/.github/settings.xml -B deploy -pl playwright -am -P FastBuild
+        run: mvn -B deploy -pl playwright -am -P FastBuild
         env:
           USER_NAME: ${{ secrets.USER_NAME }}
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
