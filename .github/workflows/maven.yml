@@ -27,15 +27,16 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
           cache: maven
+          settings-path: ${{ github.workspace }}/.github
 
-      - name: Build and test
-        run: mvn -s $GITHUB_WORKSPACE/.github/mvn-settings.xml -B package -P FullBuild
+      - name: Build, Test and Package
+        run: mvn -B package -P FullBuild
         env:
           USER_NAME: ${{ secrets.USER_NAME }}
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Package and upload artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           path: playwright/target/*.jar

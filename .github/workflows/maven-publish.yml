@@ -26,16 +26,17 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
           cache: maven
+          settings-path: ${{ github.workspace }}/.github
 
-      - name: Build and package
-        run: mvn -s $GITHUB_WORKSPACE/.github/mvn-settings.xml -B package -pl playwright -am -P FullBuild
+      - name: Build, Test and Package
+        run: mvn -B package -pl playwright -am -P FullBuild
         env:
           USER_NAME: ${{ secrets.USER_NAME }}
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to GitHub Packages
-        run: mvn -s $GITHUB_WORKSPACE/.github/mvn-settings.xml -B deploy -pl playwright -am -P FastBuild
+        run: mvn -B deploy -pl playwright -am -P FastBuild
         env:
           USER_NAME: ${{ secrets.USER_NAME }}
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
