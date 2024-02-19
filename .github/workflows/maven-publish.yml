@@ -12,6 +12,7 @@ on:
 
 jobs:
   publish:
+    name: Package and Deploy
     runs-on: ubuntu-latest
 
     permissions:
@@ -35,7 +36,7 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to GitHub Packages
+      - name: Deploy to GitHub Packages
         run: mvn -B deploy -pl playwright -am -P FastBuild
         env:
           USER_NAME: ${{ secrets.USER_NAME }}
