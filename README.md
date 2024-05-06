@@ -13,14 +13,13 @@ less on managing the underlying Playwright resources.
 
 To use this library in your project, add below Maven dependency to your pom.xml file. Make sure to use the
 latest version available. This project is deployed to both
-the [Maven Central Repository](https://central.sonatype.com/artifact/io.github.rohit-walia/playwright-manager) and the
+the [Maven Central Repository](https://central.sonatype.com/artifact/io.github.rohit-walia/playwright) and the
 [GitHub Package Registry](https://github.com/rohit-walia?tab=packages&repo_name=playwright-manager)
 
 ```xml
-
 <dependency>
     <groupId>io.github.rohit-walia</groupId>
-    <artifactId>playwright-manager</artifactId>
+    <artifactId>playwright</artifactId>
     <version>${playwright-manager.version}</version>
 </dependency>
 ```
