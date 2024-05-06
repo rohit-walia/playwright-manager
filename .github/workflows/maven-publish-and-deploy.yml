@@ -1,0 +1,45 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub. They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support documentation.
+
+name: CI/CD Pipeline - Publish and Deploy
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  publish_and_deploy:
+    name: Build, Test, Package and Deploy
+    runs-on: ubuntu-latest # Using GitHub hosted Linux runner w/ 2CPUs, 7GB RAM, 14GB SSD
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: maven
+          settings-path: ${{ github.workspace }}/.github
+          overwrite-settings: false
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }} # import GPG private key
+
+      - name: Deploy to GitHub Packages & Maven Central
+        run: mvn $MVN_CLI_OPTS deploy
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }} # for gpg signing
+          USER_NAME: ${{ secrets.USER_NAME }}
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # for GitHub APIs
+          MVN_CLI_OPTS: -s ${{ github.workspace }}/.github/settings.xml -B -P FullBuild
+          MVN_CENTRAL_USER: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MVN_CENTRAL_PASS: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
