@@ -4,6 +4,7 @@
 
     <activeProfiles>
         <activeProfile>github</activeProfile>
+        <activeProfile>central</activeProfile>
     </activeProfiles>
 
     <profiles>
@@ -11,15 +12,21 @@
             <id>github</id>
             <repositories>
                 <repository>
+                    <id>github</id>
+                    <url>https://maven.pkg.github.com/${env.USER_NAME}/*</url>
+                </repository>
+            </repositories>
+        </profile>
+        <profile>
+            <id>central</id>
+            <properties>
+                <gpg.executable>gpg</gpg.executable>
+                <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
+            </properties>
+            <repositories>
+                <repository>
                     <id>central</id>
                     <url>https://repo1.maven.org/maven2</url>
-                </repository>
-                <repository>
-                    <id>github</id>
-                    <url>https://maven.pkg.github.com/rohit-walia/*</url>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
                 </repository>
             </repositories>
         </profile>
@@ -29,7 +36,12 @@
         <server>
             <id>github</id>
             <username>${env.USER_NAME}</username>
-            <password>${env.ACCESS_TOKEN}</password>
+            <password>${env.PAT_TOKEN}</password>
+        </server>
+        <server>
+            <id>central</id>
+            <username>${env.MVN_CENTRAL_USER}</username>
+            <password>${env.MVN_CENTRAL_PASS}</password>
         </server>
     </servers>
 </settings>

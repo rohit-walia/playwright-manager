@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.playwright</groupId>
+        <groupId>io.github.rohit-walia</groupId>
         <artifactId>playwright-manager</artifactId>
-        <version>0.1.0</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>playwright</artifactId>
@@ -18,12 +18,6 @@
             <groupId>com.microsoft.playwright</groupId>
             <artifactId>playwright</artifactId>
             <version>${playwright.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.jupiter.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.artsok</groupId>
@@ -42,13 +36,13 @@
             <version>${assertj.joda.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.failsafe</groupId>
-            <artifactId>core</artifactId>
+            <groupId>io.github.rohit-walia</groupId>
+            <artifactId>failsafehelper</artifactId>
             <version>${failsafe-helper.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.jacksonhelper</groupId>
-            <artifactId>core</artifactId>
+            <groupId>io.github.rohit-walia</groupId>
+            <artifactId>jacksonhelper</artifactId>
             <version>${jackson-helper.version}</version>
         </dependency>
     </dependencies>
@@ -60,7 +54,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.version}</version>
-                <!-- References to interface static methods are allowed only at source level 1.8 or above -->
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -71,7 +64,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven.surefire.version}</version>
             </plugin>
-            <!-- Check source style -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -80,6 +72,113 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven.source.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadoc.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <doclint>all,-missing</doclint>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>${maven-central-publishing.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>FullBuild</id>
+            <properties>
+                <skipTests>false</skipTests>
+                <skipChecks>false</skipChecks>
+                <skipBuildInfo>false</skipBuildInfo>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven-gpg.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <url>https://github.com/rohit-walia/playwright-manager</url>
+    <description>This library dedicated to testing-oriented projects that utilize Microsoft's Playwright for Java automation
+        tool. It provides a convenient and effective way to manage Playwright resources.
+
+        With PlaywrightManager, you can easily create, reuse, and close Playwright resources. It provides both default
+        options and the flexibility to customize resource creation based on your specific requirements. Focus more on writing
+        your test code and less on managing the underlying Playwright resources.
+    </description>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Rohit Walia</name>
+            <email>rohitwalia91@gmail.com</email>
+            <organizationUrl>https://github.com/rohit-walia</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git://github.com/rohit-walia/playwright-manager.git</connection>
+        <developerConnection>scm:git:https://github.com/rohit-walia/playwright-manager.git</developerConnection>
+        <url>https://github.com/rohit-walia/playwright-manager/tree/main</url>
+    </scm>
 </project>

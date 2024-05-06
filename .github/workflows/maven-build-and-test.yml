@@ -1,0 +1,84 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub. They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support documentation.
+
+name: CI/CD Pipeline - Build, Test and Upload Artifacts
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_test:
+    name: Build and Test
+    if: ${{ github.ref != 'refs/heads/main' }}
+    runs-on: ubuntu-latest # Using GitHub hosted Linux runner w/ 2CPUs, 7GB RAM, 14GB SSD
+
+    permissions:
+      checks: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: maven
+          settings-path: ${{ github.workspace }}/.github
+          overwrite-settings: false
+
+      - name: Build and Test
+        run: mvn $MVN_CLI_ARGS test
+        env:
+          USER_NAME: ${{ secrets.USER_NAME }}
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+          MVN_CLI_ARGS: -s ${{ github.workspace }}/.github/settings.xml -B -P FullBuild
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4.1.0
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: 'playwright/target/surefire-reports/TEST-*.xml'
+          fail_on_failure: true
+
+  upload_artifacts:
+    name: Package and Upload Artifacts
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest # Using GitHub hosted Linux runner w/ 2CPUs, 7GB RAM, 14GB SSD
+
+    permissions:
+      checks: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: maven
+          settings-path: ${{ github.workspace }}/.github
+          overwrite-settings: false
+
+      - name: Package and Upload Artifacts
+        run: mvn $MVN_CLI_ARGS package
+        env:
+          USER_NAME: ${{ secrets.USER_NAME }}
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # for GitHub APIs
+          MVN_CLI_ARGS: -s ${{ github.workspace }}/.github/settings.xml -B -P FastBuild
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar artifacts
+          path: playwright/target/*.jar

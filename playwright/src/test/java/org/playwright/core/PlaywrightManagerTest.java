@@ -1,4 +1,4 @@
-package playwright;
+package org.playwright.core;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.playwright.common.OptionCtx;
 import org.playwright.common.PlaywrightResource;
 import org.playwright.common.ResourceOptionArg;
-import org.playwright.core.PlaywrightManager;
 import org.playwright.core.options.BrowserContextOption;
 import org.playwright.core.options.BrowserLaunchOption;
 import org.playwright.core.options.IOption;
