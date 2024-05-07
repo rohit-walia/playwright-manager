@@ -5,18 +5,20 @@ The Playwright Resource Manager is a library dedicated to testing-oriented proje
 work with Playwright in your testing projects. The `PlaywrightManager` class is specifically designed to help you efficiently
 manage the lifecycle of Playwright resources.
 
-With PlaywrightManager, you can easily create, reuse, and close Playwright resources. It provides both default options and
-the flexibility to customize resource creation based on your specific requirements. Focus more on writing your test code and
-less on managing the underlying Playwright resources.
+With PlaywrightManager, you can easily create, reuse, and close
+[Playwright resources](playwright/src/main/java/org/playwright/common/PlaywrightResource.java). These resources can be
+created with default options or customized to your specific configuration. Focus more on writing your test code and less on
+managing the underlying Playwright resources.
 
 ## Installation
 
 To use this library in your project, add below Maven dependency to your pom.xml file. Make sure to use the
 latest version available. This project is deployed to both
-the [Maven Central Repository](https://central.sonatype.com/artifact/io.github.rohit-walia/playwright) and the
-[GitHub Package Registry](https://github.com/rohit-walia?tab=packages&repo_name=playwright-manager)
+the [Maven Central Repository](https://central.sonatype.com/artifact/io.github.rohit-walia/playwright) and
+the[GitHub Package Registry](https://github.com/rohit-walia?tab=packages&repo_name=playwright-manager)
 
 ```xml
+
 <dependency>
     <groupId>io.github.rohit-walia</groupId>
     <artifactId>playwright</artifactId>

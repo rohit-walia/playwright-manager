@@ -17,4 +17,8 @@ public class PlaywrightSingleton {
   public static void setInstance(Playwright playwright) {
     PlaywrightSingleton.playwright.set(playwright);
   }
+
+  public static void removeInstance() {
+    playwright.remove();
+  }
 }

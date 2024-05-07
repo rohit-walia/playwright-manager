@@ -12,6 +12,10 @@ public class BrowserLaunchOption implements IOption<BrowserType.LaunchOptions> {
   @Builder.Default
   boolean headless = true;
 
+  /**
+   * Slow down execution (by N milliseconds per operation). It is defaulted to 300ms because this reflects closely to
+   * the real world human execution speed. Please adjust depending on the nature of your project.
+   */
   @Builder.Default
   double slowmo = 300;
 

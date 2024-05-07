@@ -31,6 +31,10 @@ public class OptionCtx {
     return context.containsKey(key);
   }
 
+  public static void remove(Key key) {
+    context.remove(key);
+  }
+
   public enum Key {
     PLAYWRIGHT_OPTION,
     BROWSER_LAUNCH_OPTION,
