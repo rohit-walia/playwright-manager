@@ -19,6 +19,9 @@ public class PlaywrightOption implements IOption<Playwright.CreateOptions> {
   @Builder.Default
   boolean enableDebugMode = false;
 
+  /**
+   * Output verbose api logs to console.
+   */
   @Builder.Default
   boolean enableVerboseApiLogs = false;
 

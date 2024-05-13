@@ -1,4 +1,4 @@
-package org.playwright.common;
+package org.playwright.utils;
 
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Response;

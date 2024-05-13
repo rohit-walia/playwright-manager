@@ -17,4 +17,8 @@ public class BrowserSingleton {
   public static synchronized void setInstance(Browser browser) {
     BrowserSingleton.browser.set(browser);
   }
+
+  public static void removeInstance() {
+    browser.remove();
+  }
 }

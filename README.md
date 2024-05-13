@@ -5,18 +5,20 @@ The Playwright Resource Manager is a library dedicated to testing-oriented proje
 work with Playwright in your testing projects. The `PlaywrightManager` class is specifically designed to help you efficiently
 manage the lifecycle of Playwright resources.
 
-With PlaywrightManager, you can easily create, reuse, and close Playwright resources. It provides both default options and
-the flexibility to customize resource creation based on your specific requirements. Focus more on writing your test code and
-less on managing the underlying Playwright resources.
+With PlaywrightManager, you can easily create, get, and close
+[Playwright resources](playwright/src/main/java/org/playwright/common/PlaywrightResource.java). These resources can be
+created with default options or customized to your specific configuration. Focus more on writing your test code and less on
+managing the underlying Playwright resources.
 
 ## Installation
 
 To use this library in your project, add below Maven dependency to your pom.xml file. Make sure to use the
 latest version available. This project is deployed to both
-the [Maven Central Repository](https://central.sonatype.com/artifact/io.github.rohit-walia/playwright) and the
-[GitHub Package Registry](https://github.com/rohit-walia?tab=packages&repo_name=playwright-manager)
+the [Maven Central Repository](https://central.sonatype.com/artifact/io.github.rohit-walia/playwright) and
+the[GitHub Package Registry](https://github.com/rohit-walia?tab=packages&repo_name=playwright-manager)
 
 ```xml
+
 <dependency>
     <groupId>io.github.rohit-walia</groupId>
     <artifactId>playwright</artifactId>
@@ -28,26 +30,21 @@ the [Maven Central Repository](https://central.sonatype.com/artifact/io.github.r
 
 #### Creating resources with default options
 
-This code snippet shows how you can create Playwright resources using the **PlaywrightManager**. By default, resources will
-be created with the default Option. See package [here](playwright/src/main/java/org/playwright/core/options) for available
-options.
-
-The BrowserContext resource is always created as a new instance. The Browser and Playwright instances are reused if there is
-one already existing (default behavior). However, this can be overridden by passing ResourceOptionArg.NEW_BROWSER_INSTANCE or
-ResourceOptionArg.NEW_PLAYWRIGHT_INSTANCE as arguments to the create() method.
+Below example demonstrates how you can create Playwright resources by invoking the create() function, automate browser
+actions like navigating to a URL, and finally closing those resources.
 
 ```Java
 void resourcesWithDefaultOptions() {
-  // create resources w/ default options
+  //create resources w/ default options
   Playwright playwright = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT);
   Browser browser = PlaywrightManager.create(PlaywrightResource.BROWSER);
   BrowserContext browserContext = PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT);
 
-  // open browser page and execute automation
+  //open browser page and execute automation
   Page page = browserContext.newPage();
   page.navigate("https://github.com/rohit-walia/playwright-manager");
 
-  // remember to close the resources when you are finished with them!
+  //remember to close the resources when you are finished with them!
   PlaywrightManager.close(browserContext);
   PlaywrightManager.close(browser);
   PlaywrightManager.close(playwright);
@@ -56,12 +53,12 @@ void resourcesWithDefaultOptions() {
 
 #### Creating resources with custom options
 
-You can pass arguments to the create() method to customize how you want to create these resources. Every Option is a Builder
-Object.
+You can pass [Options](playwright/src/main/java/org/playwright/core/options) to the create() function to customize these
+resources. This gives users more control over the behavior of Playwright resources. All Options and their default
 
 ```Java
 void resourcesWithCustomOptions() {
-  // enable debug mode and verbose api logging
+  //enable debug mode and verbose api logging
   PlaywrightOption playwrightOption = PlaywrightOption.builder()
       .enableDebugMode(true)
       .enableVerboseApiLogs(true)
@@ -69,7 +66,7 @@ void resourcesWithCustomOptions() {
 
   Playwright playwright = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT, playwrightOption);
 
-  // custom BrowserLaunchOption
+  //custom BrowserLaunchOption
   BrowserLaunchOption browserLaunchOption = BrowserLaunchOption.builder()
       .headless(false)
       .slowmo(300)
@@ -77,12 +74,86 @@ void resourcesWithCustomOptions() {
       .browserStartTimeout(30000)
       .build();
 
-  // create Browser w/ custom BrowserLaunchOption
+  //create Browser w/ custom BrowserLaunchOption
   Browser browser = PlaywrightManager.create(PlaywrightResource.BROWSER, browserLaunchOption);
 
-  // create BrowserContext w/ custom BrowserContextOption
+  //create BrowserContext w/ custom BrowserContextOption
   BrowserContextOption browserContextOption = BrowserContextOption.builder().recordVideoDir("target/video").build();
   BrowserContext browserContext = PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT, browserContextOption);
+
+  //remember to close the resources when you are finished with them!
+  PlaywrightManager.close(browserContext);
+  PlaywrightManager.close(browser);
+  PlaywrightManager.close(playwright);
+}
+```
+
+#### Simulating multi-browser isolated scenario
+
+In some cases, you might need to stand up multiple independent browser sessions. Since BrowserContext instances are isolated
+and don't share cookies/cache with each other, creating multiple BrowserContexts is one way to approach these types of
+scenarios. Alternatively, you can also create multiple Browser instances and then multiple BrowserContext per Browser
+instance. This resource creations strategy should be carefully thought out.
+
+In addition to resource Options, the create() function can further be controlled by passing extra arguments such as
+resource instances. Below example demonstrates how we can automate two isolated browser actions against a single
+Playwright connection.
+
+```Java
+void multiBrowserExample() {
+  Playwright playwright = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT);
+  Browser browser = PlaywrightManager.create(PlaywrightResource.BROWSER);
+
+  //create multiple BrowserContext
+  BrowserContext browserContext1 = PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT);
+  BrowserContext browserContext2 = PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT);
+
+  //browser1 will navigate to github
+  Page page1 = browserContext1.newPage();
+  page1.navigate("https://github.com/rohit-walia/playwright-manager");
+
+  //browser2 will navigate to maven
+  Page page2 = browserContext2.newPage();
+  page2.navigate("https://central.sonatype.com/artifact/io.github.rohit-walia/playwright");
+
+  //remember to close the resources when you are finished with them!
+  PlaywrightManager.close(browserContext1);
+  PlaywrightManager.close(browserContext2);
+  PlaywrightManager.close(browser);
+  PlaywrightManager.close(playwright);
+}
+```
+
+#### Running in parallel
+
+Playwright for Java out of the box is not thread safe. All Playwright resources are expected to be called on the same thread
+where the Playwright object was created or proper synchronization should be implemented to ensure only one thread calls
+Playwright resources at any given time. More details [here](https://playwright.dev/java/docs/multithreading)
+
+Below example demonstrates how this library can provide out of the box solution for achieving parallelism with Playwright.
+
+```Java
+void parallelismExample() {
+  //create two Playwright connections
+  Playwright playwright1 = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT);
+  Playwright playwright2 = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT);
+
+  //create two Browsers
+  Browser browser1 = PlaywrightManager.create(PlaywrightResource.BROWSER, playwright1);
+  Browser browser2 = PlaywrightManager.create(PlaywrightResource.BROWSER, playwright2);
+
+  //create 1 BrowserContext for each Browser instance
+  BrowserContext browserContext1 = PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT, browser1);
+  BrowserContext browserContext2 = PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT, browser2);
+
+  //remember to close the resources when you are finished with them!
+  PlaywrightManager.close(playwright2);
+  PlaywrightManager.close(browserContext2);
+  PlaywrightManager.close(browser2);
+
+  PlaywrightManager.close(browserContext1);
+  PlaywrightManager.close(browser1);
+  PlaywrightManager.close(playwright1);
 }
 ```
 
@@ -113,5 +184,3 @@ serialization and deserialization capabilities.
 
 As part of the build, there are several code quality checks running against the code base. All code quality files can be
 found in the root of the project under the [codequality](.codequality) directory.
-
-#### CheckStyle
