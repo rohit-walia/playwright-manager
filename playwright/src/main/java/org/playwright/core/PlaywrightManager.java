@@ -27,7 +27,7 @@ public interface PlaywrightManager {
   org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PlaywrightManager.class);
 
   /**
-   * Create Playwright resources which includes: Playwright, Browser, & BrowserContext. <br><br>
+   * Create Playwright resources which includes: Playwright, Browser, and BrowserContext. <br><br>
    *
    * <p>By default, resources will be created with default Options. See package {@link org.playwright.core.options} for
    * available options.</p><br>
