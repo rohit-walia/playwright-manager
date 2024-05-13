@@ -8,16 +8,13 @@ import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.PlaywrightException;
 import lombok.SneakyThrows;
 import org.failsafe.failsafe.retry.RetryAgain;
-import org.playwright.common.OptionCtx;
 import org.playwright.common.PlaywrightResource;
-import org.playwright.common.ResourceOptionArg;
 import org.playwright.common.Timeout;
 import org.playwright.core.options.BrowserContextOption;
 import org.playwright.core.options.BrowserLaunchOption;
 import org.playwright.core.options.PlaywrightOption;
 import org.playwright.core.options.TracingStartOption;
 import org.playwright.core.options.TracingStopOption;
-import org.playwright.utils.ObjUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -88,89 +85,54 @@ public interface PlaywrightManager {
   @SneakyThrows
   static <T extends AutoCloseable> void close(T object, Object... args) {
     if (object instanceof BrowserContext) {
-      TracingStopOption tracingStopOption = getFromArray(args, TracingStopOption.class).orElse(
-          OptionCtx.exists(OptionCtx.Key.TRACE_STOP_OPTION)
-              ? (TracingStopOption) OptionCtx.getContext().get(OptionCtx.Key.TRACE_STOP_OPTION)
-              : TracingStopOption.builder().build());
-
+      TracingStopOption tracingStopOption = getFromArray(args, TracingStopOption.class)
+          .orElse(TracingStopOption.builder().build());
       ((BrowserContext) object).tracing().stop(tracingStopOption.forPlaywright());
-      OptionCtx.remove(OptionCtx.Key.BROWSER_CONTEXT_OPTION);
     }
     if (object instanceof Browser) {
-      OptionCtx.remove(OptionCtx.Key.BROWSER_LAUNCH_OPTION);
       BrowserSingleton.removeInstance();
     }
     if (object instanceof Playwright) {
-      OptionCtx.remove(OptionCtx.Key.PLAYWRIGHT_OPTION);
       PlaywrightSingleton.removeInstance();
     }
     object.close();
   }
 
   private static Playwright createPlaywright(Object[] args) {
-    List<ResourceOptionArg> argsList = ObjUtils.filterFromArray(args, ResourceOptionArg.class);
-
-    // handle creating Playwright instance when one already active
     if (PlaywrightSingleton.getInstance() != null) {
-      if (argsList.isEmpty()) {
-        log.info("Existing Playwright connection already active. Returning existing instance.");
-        return PlaywrightSingleton.getInstance();
-      }
-      if (!argsList.contains(ResourceOptionArg.NEW_PLAYWRIGHT_INSTANCE)) {
-        throw new IllegalArgumentException("Invalid argument passed " + argsList);
-      }
-      log.warn("You are creating more than one Playwright instance.");
+      log.info("Existing Playwright resource already open! Creating new Playwright connection.");
+    } else {
+      log.info("No existing Playwright resource found! Creating new Playwright connection.");
     }
 
-    log.info("Creating Playwright resource...");
-
-    PlaywrightOption options = getFromArray(args, PlaywrightOption.class).orElseGet(() -> {
-      if (OptionCtx.exists(OptionCtx.Key.PLAYWRIGHT_OPTION)) {
-        log.info("Reusing existing PlaywrightOptions.");
-        return (PlaywrightOption) OptionCtx.getContext().get(OptionCtx.Key.PLAYWRIGHT_OPTION);
-      }
-      log.info("Using default PlaywrightOptions.");
-      return PlaywrightOption.builder().build();
-    });
+    PlaywrightOption options = getFromArray(args, PlaywrightOption.class).orElse(PlaywrightOption.builder().build());
 
     // failsafe retry put in place to avoid rare occurrence of playwright driver failing to initialize at Runtime.
     RetryAgain.onceWithDelay(() -> PlaywrightSingleton.setInstance(Playwright.create(options.forPlaywright())),
         Timeout.FIVE.getSecond());
 
-    OptionCtx.add(OptionCtx.Key.PLAYWRIGHT_OPTION, options);
-
     return PlaywrightSingleton.getInstance();
   }
 
   private static Browser createBrowser(Object[] args) {
-    List<ResourceOptionArg> argsList = ObjUtils.filterFromArray(args, ResourceOptionArg.class);
-
-    // handle creating Browser instance when one already active
-    if (BrowserSingleton.getInstance() != null) {
-      if (argsList.isEmpty()) {
-        log.info("Existing Browser connection already active. Returning existing instance.");
-        return BrowserSingleton.getInstance();
-      }
-      if (!argsList.contains(ResourceOptionArg.NEW_BROWSER_INSTANCE)) {
-        throw new IllegalArgumentException("Invalid argument passed " + argsList);
-      }
-      log.info("You are creating more than one Browser instance.");
-    }
-
+    // creating Browser required Playwright resource to be initialized.
     if (PlaywrightSingleton.getInstance() == null) {
       throw new PlaywrightException("Playwright instance is not initialized. Please initialize Playwright before "
-          + "creating a Browser.");
+          + "attempting to create Browser.");
     }
-    Playwright playwright = PlaywrightSingleton.getInstance();
 
-    BrowserLaunchOption options = getFromArray(args, BrowserLaunchOption.class).orElseGet(() -> {
-      if (OptionCtx.exists(OptionCtx.Key.BROWSER_LAUNCH_OPTION)) {
-        log.info("Reusing existing BrowserLaunchOptions.");
-        return (BrowserLaunchOption) OptionCtx.getContext().get(OptionCtx.Key.BROWSER_LAUNCH_OPTION);
-      }
-      log.info("Using default BrowserLaunchOptions.");
-      return BrowserLaunchOption.builder().build();
-    });
+    // get Playwright instance. Reuse if instance provided in arguments.
+    Playwright playwright = getFromArray(args, Playwright.class).orElse(PlaywrightSingleton.getInstance());
+
+    if (BrowserSingleton.getInstance() == null) {
+      log.info("No existing Browser found! Creating new Browser.");
+    } else {
+      log.info("Existing Browser resource already open! Creating new Browser.");
+    }
+
+    // use BrowserLaunchOptions provided in arguments or fallback to use default options.
+    BrowserLaunchOption options =
+        getFromArray(args, BrowserLaunchOption.class).orElse(BrowserLaunchOption.builder().build());
 
     Browser browser = switch (options.getBrowser()) {
       case "chromium", "chrome", "msedge" -> playwright.chromium().launch(options.forPlaywright());
@@ -180,31 +142,24 @@ public interface PlaywrightManager {
     };
 
     BrowserSingleton.setInstance(browser);
-    OptionCtx.add(OptionCtx.Key.BROWSER_LAUNCH_OPTION, options);
     return BrowserSingleton.getInstance();
   }
 
   private static BrowserContext createBrowserContext(Object[] args) {
-    BrowserContextOption browserContextOption = getFromArray(args, BrowserContextOption.class).orElse(
-        OptionCtx.exists(OptionCtx.Key.BROWSER_CONTEXT_OPTION)
-            ? (BrowserContextOption) OptionCtx.getContext().get(OptionCtx.Key.BROWSER_CONTEXT_OPTION)
-            : BrowserContextOption.builder().build());
-
-    TracingStartOption tracingStartOption = getFromArray(args, TracingStartOption.class).orElse(
-        OptionCtx.exists(OptionCtx.Key.TRACE_START_OPTION)
-            ? (TracingStartOption) OptionCtx.getContext().get(OptionCtx.Key.TRACE_START_OPTION)
-            : TracingStartOption.builder().build());
-
     if (BrowserSingleton.getInstance() == null) {
-      throw new PlaywrightException("Browser instance is not initialized. Please initialize Browser before "
-          + "creating a BrowserContext.");
+      throw new PlaywrightException("Browser instance is not initialized. Please initialize Browser before attempting to "
+          + "create BrowserContext.");
     }
+    Browser browserInstance = getFromArray(args, Browser.class).orElse(BrowserSingleton.getInstance());
 
-    BrowserContext browserCtx = BrowserSingleton.getInstance().newContext(browserContextOption.forPlaywright());
+    BrowserContextOption browserContextOption =
+        getFromArray(args, BrowserContextOption.class).orElse(BrowserContextOption.builder().build());
+
+    TracingStartOption tracingStartOption =
+        getFromArray(args, TracingStartOption.class).orElse(TracingStartOption.builder().build());
+
+    BrowserContext browserCtx = browserInstance.newContext(browserContextOption.forPlaywright());
     browserCtx.tracing().start(tracingStartOption.forPlaywright());
-
-    OptionCtx.add(OptionCtx.Key.BROWSER_CONTEXT_OPTION, browserContextOption);
-    OptionCtx.add(OptionCtx.Key.TRACE_START_OPTION, tracingStartOption);
 
     return browserCtx;
   }

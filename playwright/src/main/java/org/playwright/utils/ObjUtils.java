@@ -13,12 +13,12 @@ public final class ObjUtils {
    * Filters an array of objects to only contain those objects that are the same type as provided class.
    *
    * @param arrayOfObjects array of Objects
-   * @param clazzToCollect class to filter array of objects
+   * @param objectToCollect class to filter array of objects
    * @return list
    */
-  public static <T> List<T> filterFromArray(Object[] arrayOfObjects, @NonNull Class<T> clazzToCollect) {
+  public static <T> List<T> filterFromArray(Object[] arrayOfObjects, @NonNull Class<T> objectToCollect) {
     return Arrays.stream(arrayOfObjects)
-        .filter(arg -> arg.getClass().isAssignableFrom(clazzToCollect))
+        .filter(arg -> arg.getClass().isAssignableFrom(objectToCollect))
         .map(arg -> (T) arg)
         .toList();
   }
