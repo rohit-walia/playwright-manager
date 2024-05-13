@@ -6,7 +6,7 @@
 
     <groupId>io.github.rohit-walia</groupId>
     <artifactId>playwright-manager</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>pom</packaging>
 
     <name>playwright-manager</name>
