@@ -153,12 +153,7 @@
 
     <name>${project.groupId}:${project.artifactId}</name>
     <url>https://github.com/rohit-walia/playwright-manager</url>
-    <description>This library dedicated to testing-oriented projects that utilize Microsoft's Playwright for Java automation
-        tool. It provides a convenient and effective way to manage Playwright resources.
-
-        With PlaywrightManager, you can easily create, reuse, and close Playwright resources. It provides both default
-        options and the flexibility to customize resource creation based on your specific requirements. Focus more on writing
-        your test code and less on managing the underlying Playwright resources.
+    <description>The PlaywrightManager provides a convenient way to create, customize, and manage Playwright resources.
     </description>
 
     <licenses>

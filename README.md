@@ -1,21 +1,25 @@
-# 🎭 Playwright Resource Manager
+# 🎭 Playwright Manager
 
-The Playwright Resource Manager is a library dedicated to testing-oriented projects that utilize Microsoft's
-**Playwright _for_ Java** automation tool. It provides a convenient way to manage Playwright resources, making it easier to
-work with Playwright in your testing projects. The `PlaywrightManager` class is specifically designed to help you efficiently
-manage the lifecycle of Playwright resources.
-
-With PlaywrightManager, you can easily create, get, and close
-[Playwright resources](playwright/src/main/java/org/playwright/common/PlaywrightResource.java). These resources can be
-created with default options or customized to your specific configuration. Focus more on writing your test code and less on
+The **PlaywrightManager** provides a convenient way to create, customize, and manage
+[Playwright resources](playwright/src/main/java/org/playwright/common/PlaywrightResource.java). Focus more on writing your
+test code and less on
 managing the underlying Playwright resources.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage Examples](#usage-examples)
+    - [Creating resources with default options](#creating-resources-with-default-options)
+    - [Creating resources with custom options](#creating-resources-with-custom-options)
+    - [Simulating multi-browser scenario](#simulating-multi-browser-scenario)
+    - [Running tests in parallel](#running-tests-in-parallel)
 
 ## Installation
 
 To use this library in your project, add below Maven dependency to your pom.xml file. Make sure to use the
 latest version available. This project is deployed to both
 the [Maven Central Repository](https://central.sonatype.com/artifact/io.github.rohit-walia/playwright) and
-the[GitHub Package Registry](https://github.com/rohit-walia?tab=packages&repo_name=playwright-manager)
+the [GitHub Package Registry](https://github.com/rohit-walia?tab=packages&repo_name=playwright-manager)
 
 ```xml
 
@@ -34,7 +38,7 @@ Below example demonstrates how you can create Playwright resources by invoking t
 actions like navigating to a URL, and finally closing those resources.
 
 ```Java
-void resourcesWithDefaultOptions() {
+void test() {
   //create resources w/ default options
   Playwright playwright = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT);
   Browser browser = PlaywrightManager.create(PlaywrightResource.BROWSER);
@@ -54,10 +58,10 @@ void resourcesWithDefaultOptions() {
 #### Creating resources with custom options
 
 You can pass [Options](playwright/src/main/java/org/playwright/core/options) to the create() function to customize these
-resources. This gives users more control over the behavior of Playwright resources. All Options and their default
+resources. This gives users more control over the behavior of Playwright resources.
 
 ```Java
-void resourcesWithCustomOptions() {
+void test() {
   //enable debug mode and verbose api logging
   PlaywrightOption playwrightOption = PlaywrightOption.builder()
       .enableDebugMode(true)
@@ -88,19 +92,15 @@ void resourcesWithCustomOptions() {
 }
 ```
 
-#### Simulating multi-browser isolated scenario
+#### Simulating multi-browser scenario
 
-In some cases, you might need to stand up multiple independent browser sessions. Since BrowserContext instances are isolated
-and don't share cookies/cache with each other, creating multiple BrowserContexts is one way to approach these types of
-scenarios. Alternatively, you can also create multiple Browser instances and then multiple BrowserContext per Browser
-instance. This resource creations strategy should be carefully thought out.
+In some cases, you might need your automation to spawn multiple browsers. Since BrowserContext instances are isolated and
+don’t share cookies/cache with each other, creating multiple BrowserContexts is one way to approach these types of scenarios.
 
-In addition to resource Options, the create() function can further be controlled by passing extra arguments such as
-resource instances. Below example demonstrates how we can automate two isolated browser actions against a single
-Playwright connection.
+Alternatively, you can also create multiple Browser instances and then create multiple BrowserContext per Browser instance.
 
 ```Java
-void multiBrowserExample() {
+void test() {
   Playwright playwright = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT);
   Browser browser = PlaywrightManager.create(PlaywrightResource.BROWSER);
 
@@ -124,16 +124,10 @@ void multiBrowserExample() {
 }
 ```
 
-#### Running in parallel
-
-Playwright for Java out of the box is not thread safe. All Playwright resources are expected to be called on the same thread
-where the Playwright object was created or proper synchronization should be implemented to ensure only one thread calls
-Playwright resources at any given time. More details [here](https://playwright.dev/java/docs/multithreading)
-
-Below example demonstrates how this library can provide out of the box solution for achieving parallelism with Playwright.
+In addition to passing Options, the create() function can also consume other resource instances.
 
 ```Java
-void parallelismExample() {
+void test() {
   //create two Playwright connections
   Playwright playwright1 = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT);
   Playwright playwright2 = PlaywrightManager.create(PlaywrightResource.PLAYWRIGHT);
@@ -142,7 +136,7 @@ void parallelismExample() {
   Browser browser1 = PlaywrightManager.create(PlaywrightResource.BROWSER, playwright1);
   Browser browser2 = PlaywrightManager.create(PlaywrightResource.BROWSER, playwright2);
 
-  //create 1 BrowserContext for each Browser instance
+  //create BrowserContext for each Browser instance
   BrowserContext browserContext1 = PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT, browser1);
   BrowserContext browserContext2 = PlaywrightManager.create(PlaywrightResource.BROWSER_CONTEXT, browser2);
 
@@ -157,7 +151,19 @@ void parallelismExample() {
 }
 ```
 
-# Tools, libraries, and technologies
+#### Running tests in parallel
+
+Playwright for Java, out of the box, is not thread safe.
+
+All Playwright resources are expected to be called on the same thread where the Playwright object was created or proper
+synchronization should be implemented to ensure only one thread calls Playwright resources at any given time More
+details [here](https://playwright.dev/java/docs/multithreading)
+
+This library also provides proper resource synchronication! With this library, go ahead and configure your test runner for
+parallel execution :)
+
+
+# Dependencies
 
 ### JUnit5
 
@@ -179,8 +185,3 @@ handling, retry and fallback capabilities.
 
 This project is leveraging the [Jackson Helper](https://github.com/rohit-walia/jackson-helper) library for its convenient
 serialization and deserialization capabilities.
-
-### Code Quality
-
-As part of the build, there are several code quality checks running against the code base. All code quality files can be
-found in the root of the project under the [codequality](.codequality) directory.

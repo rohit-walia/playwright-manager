@@ -10,7 +10,8 @@
     <packaging>pom</packaging>
 
     <name>playwright-manager</name>
-    <description>Playwright Manager</description>
+    <description>The PlaywrightManager provides a convenient way to create, customize, and manage Playwright resources.
+    </description>
 
     <modules>
         <module>playwright</module>
